@@ -8,15 +8,17 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class LibraryViewController: UIViewController {
     let bookStore = BookStore()
+    let checkOut = CheckOutPost()
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        bookStore.fetchGlobalBooks { result in
-            print(result)
-        }
+        //bookStore.fetchGlobalBooks { result in
+        //    print(result)
+        //}
         
+        checkOut.pushGlobalPost()
     }
 
     override func didReceiveMemoryWarning() {

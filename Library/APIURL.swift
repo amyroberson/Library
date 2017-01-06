@@ -14,6 +14,7 @@ internal struct APIURL {
         case invalidJSONData
     }
     
-    internal static let globalStreamURL: URL = URL(string: "https://tiy-todo-angular.herokuapp.com/get-all-books.json")!
+    internal static let globalStreamURL: URL = URL(string: "https://reece-tiy-library.herokuapp.com/test.json")!
     
+   
 }

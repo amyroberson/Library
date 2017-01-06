@@ -36,7 +36,7 @@ class LibrarySystem {
     }
     
     func toDictionary() -> [String:Any]{
-        let array = (self.books.map{$0.toDictionary()})
+        let array = (self.books.map{$0.toDictionary()}) //can you map over a set?
         let dictionary: [String: Any] = [
             "books": array
         ]

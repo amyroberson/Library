@@ -13,29 +13,32 @@ public struct Book {
     let title: String
     let author: String
     let genre: String
-    let user: User?
+    var checkedOutBy: String?
+    let id: Int
     
-    public init(checkedOut: Bool, title: String, author: String, genre: String, user: User?){
+    
+    public init(checkedOut: Bool, title: String, author: String, genre: String, id: Int, checkedOutBy: String?){
         self.checkedOut = checkedOut
         self.title = title
         self.author = author
         self.genre = genre
-        self.user = user
+        self.id = id
+        self.checkedOutBy = checkedOutBy
     }
 
     internal init?(dictionary: [String: Any] ){
         guard let checkedOut = dictionary["checkedOut"] as? Bool,
             let title = dictionary["title"] as? String,
             let author = dictionary["author"] as? String,
-            let genre = dictionary["genre"] as? String   else {
+            let genre = dictionary["genre"] as? String,
+            let id = dictionary["id"] as? Int else {
                 return nil
         }
-        guard let person: [String:Any] = dictionary["user"] as? [String : Any] else {
-             self.init(checkedOut: checkedOut, title: title, author: author, genre: genre, user: nil)
+        guard let checkedOutBy = dictionary["checkedOutBy"] as? String else {
+            self.init(checkedOut: checkedOut, title: title, author: author, genre: genre, id: id, checkedOutBy: nil)
             return
         }
-        let user = User(dictionary: person)
-        self.init(checkedOut: checkedOut, title: title, author: author, genre: genre, user: user!)
+        self.init(checkedOut: checkedOut, title: title, author: author, genre: genre, id: id, checkedOutBy: checkedOutBy)
     }
     
     func toDictionary() -> [String: Any]{
@@ -44,20 +47,26 @@ public struct Book {
             "title" : self.title,
             "author" : self.author,
             "genre" : self.genre,
-            "user" : self.user?.toDictionary()
+            "id" : self.id,
+            "checkedOutBy" : self.checkedOutBy
         ]
         return dictionary
         
     }
     
-    mutating func checkOut(){
-        //set due date
-        // ischeckedOut = true
+    mutating func checkOut(name: String){
+        self.checkedOut = true
+        if self.checkedOutBy == nil {
+            self.checkedOutBy = name
+        } //else error should happen here
     }
     
     mutating func returnBook(){
-        // set dueDate to nil
-        // ischeckedout = false
+        if self.checkedOut{
+            self.checkedOut = false
+            self.checkedOutBy = nil
+            // in future check logic here to make sure the returner is == checkedOutBy
+        }
     }
     
     internal static func array(from jsonObjects: [[String: Any]]) -> [Book]? {
