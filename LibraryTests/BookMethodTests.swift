@@ -97,4 +97,50 @@ class BookMethodTests: XCTestCase {
         }
     }
     
+    func testArray(){
+        let dictionary: [[String: Any]] = [
+            [
+                "checkedOut": false,
+                "title": "iOS for Dummies",
+                "author": "TJ (who else?)",
+                "genre": "Technical"
+            ],
+            [
+                "checkedOut": false,
+                "title": "Harry Potter and the something",
+                "author": "JK Rowling",
+                "genre": "Fantasy"
+            ],
+            [
+                "checkedOut": false,
+                "title": "String Theory",
+                "author": "Foster Wallace",
+                "genre": "Biography"
+            ],
+            [
+                "checkedOut": true,
+                "title": "100 years of solitude",
+                "author": "Gabriel Garcia Marquez",
+                "genre": "Fiction",
+                "user": [
+                    "userName": "dev@tiy.com",
+                    "firstName": "Master",
+                    "lastName": "Developer",
+                    "id": 7000
+                ]
+            ]
+        ]
+        let books = Book.array(from: dictionary)
+        XCTAssertEqual(books?[0].title, "iOS for Dummies")
+        XCTAssertEqual(books?[0].checkedOut, false)
+        XCTAssertEqual(books?[1].title, "Harry Potter and the something")
+        XCTAssertEqual(books?[1].checkedOut, false)
+        XCTAssertEqual(books?[2].title, "String Theory")
+        XCTAssertEqual(books?[3].checkedOut, true)
+        XCTAssertEqual(books?[3].title,"100 years of solitude")
+        XCTAssertEqual(books?[3].user?.firstName, "Master")
+        XCTAssertEqual(books?[3].user?.id, 7000)
+        XCTAssertNil(books?[1].user)
+    }
+    
 }

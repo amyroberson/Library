@@ -60,6 +60,14 @@ public struct Book {
         // ischeckedout = false
     }
     
-    
+    internal static func array(from jsonObjects: [[String: Any]]) -> [Book]? {
+        let bookArray = jsonObjects.flatMap(Book.init(dictionary:))
+        
+        if jsonObjects.count != bookArray.count {
+            return nil
+        }
+        
+        return bookArray
+    }
     
 }
