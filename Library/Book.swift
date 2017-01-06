@@ -15,7 +15,7 @@ public struct Book {
     let genre: String
     let user: User?
     
-    public init(checkedOut: Bool, title: String, author: String, genre: String, user: User){
+    public init(checkedOut: Bool, title: String, author: String, genre: String, user: User?){
         self.checkedOut = checkedOut
         self.title = title
         self.author = author
@@ -27,38 +27,27 @@ public struct Book {
         guard let checkedOut = dictionary["checkedOut"] as? Bool,
             let title = dictionary["title"] as? String,
             let author = dictionary["author"] as? String,
-            let genre = dictionary["genre"] as? String else {
+            let genre = dictionary["genre"] as? String   else {
                 return nil
         }
-        if let person: [String:Any] = dictionary["user"] as! [String : Any]? {
-            let user = User(dictionary: person)
-            self.init(checkedOut: checkedOut, title: title, author: author, genre: genre, user: user!)
-        } else {
-            return nil
+        guard let person: [String:Any] = dictionary["user"] as? [String : Any] else {
+             self.init(checkedOut: checkedOut, title: title, author: author, genre: genre, user: nil)
+            return
         }
-        
+        let user = User(dictionary: person)
+        self.init(checkedOut: checkedOut, title: title, author: author, genre: genre, user: user!)
     }
     
     func toDictionary() -> [String: Any]{
-        if let person = self.user {
-            let dictionary: [String: Any] = [
-                "checkedOut" : self.checkedOut,
-                "title" : self.title,
-                "author" : self.author,
-                "genre" : self.genre,
-                "user" : person
-            ]
-            return dictionary
-        } else {
-            let dictionary: [String: Any] = [
-                "checkedOut" : self.checkedOut,
-                "title" : self.title,
-                "author" : self.author,
-                "genre" : self.genre,
-                "user" : self.user as Any
-            ]
-            return dictionary
-        }
+        let dictionary: [String: Any?] = [
+            "checkedOut" : self.checkedOut,
+            "title" : self.title,
+            "author" : self.author,
+            "genre" : self.genre,
+            "user" : self.user?.toDictionary()
+        ]
+        return dictionary
+        
     }
     
     mutating func checkOut(){

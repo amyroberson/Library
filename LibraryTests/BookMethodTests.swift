@@ -39,15 +39,33 @@ class BookMethodTests: XCTestCase {
         XCTAssertEqual(book1?.user?.firstName, "Amy")
     }
     
+    func testFailableINIT1(){
+        let person: User? = nil
+        let dictionary: [String: Any] = [
+            "checkedOut" : true,
+            "title" : "Design Patterns",
+            "author" : "Helm",
+            "genre" : "Non-Fiction",
+            "user" : person as Any
+        ]
+        
+        let book1 = Book(dictionary: dictionary)
+        XCTAssertEqual(book1?.checkedOut, true)
+        XCTAssertEqual(book1?.title, "Design Patterns")
+        XCTAssertEqual(book1?.author, "Helm")
+        XCTAssertEqual(book1?.genre, "Non-Fiction")
+        XCTAssertNil(book1?.user)
+    }
+    
     func testToDictionary(){
         let user1 = User(userName: "Kupri", firstName: "Amy", lastName: "Roberson", id: 0001)
         let book1 = Book(checkedOut: true, title: "Design Patterns", author: "Helm", genre: "Non-Fiction", user: user1)
         let newDictionary = book1.toDictionary()
-        if let checkedOut = newDictionary["CheckedOut"] as? Bool,
-            let title = newDictionary["title"] as? String,
-            let author = newDictionary["author"] as? String,
-            let genre = newDictionary["genre"] as? String,
-            let user = newDictionary["user"] as? [String: Any] {
+        if let checkedOut: Bool = (newDictionary["checkedOut"] as? Bool),
+            let title: String = (newDictionary["title"] as? String),
+            let author: String = (newDictionary["author"] as? String),
+            let genre: String = (newDictionary["genre"] as? String),
+            let user: [String: Any] = (newDictionary["user"] as? [String: Any]) {
            
             let newUser = User(dictionary: user)
             XCTAssertEqual(checkedOut, true)
@@ -58,8 +76,25 @@ class BookMethodTests: XCTestCase {
             XCTAssertEqual(newUser?.lastName, "Roberson")
             XCTAssertEqual(author, "Helm")
             XCTAssertEqual(genre, "Non-Fiction")
+        } else {
+            XCTAssert(false)
         }
     }
     
+    func testToDictionary1(){
+        let book1 = Book(checkedOut: true, title: "Design Patterns", author: "Helm", genre: "Non-Fiction", user: nil)
+        let newDictionary = book1.toDictionary()
+        if let checkedOut = newDictionary["checkedOut"] as? Bool,
+            let title = newDictionary["title"] as? String,
+            let author = newDictionary["author"] as? String,
+            let genre = newDictionary["genre"] as? String {
+            XCTAssertEqual(checkedOut, true)
+            XCTAssertEqual(title, "Design Patterns")
+            XCTAssertEqual(author, "Helm")
+            XCTAssertEqual(genre, "Non-Fiction")
+        } else {
+            XCTAssert(false)
+        }
+    }
     
 }
