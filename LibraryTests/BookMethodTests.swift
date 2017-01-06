@@ -12,7 +12,7 @@ import XCTest
 class BookMethodTests: XCTestCase {
     
     func testINIT(){
-         let user1 = User(userName: "Kupri", firstName: "Amy", lastName: "Roberson", id: 0001)
+        let user1 = User(userName: "Kupri", firstName: "Amy", lastName: "Roberson", id: 0001)
         let book1 = Book(checkedOut: true, title: "Design Patterns", author: "Helm", genre: "Non-Fiction", user: user1)
         XCTAssertEqual(book1.checkedOut, true)
         XCTAssertEqual(book1.title, "Design Patterns")
@@ -22,7 +22,7 @@ class BookMethodTests: XCTestCase {
     }
     
     func testFailableINIT(){
-            let user1 = User(userName: "Kupri", firstName: "Amy", lastName: "Roberson", id: 0001)
+        let user1 = User(userName: "Kupri", firstName: "Amy", lastName: "Roberson", id: 0001)
         let dictionary: [String: Any] = [
             "checkedOut" : true,
             "title" : "Design Patterns",
