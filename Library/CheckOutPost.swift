@@ -14,24 +14,20 @@ struct CheckOutPostURL {
 
 struct CheckOutPost {
     
-    let session = URLSession.shared
+    let session: URLSession = URLSession.shared
     
-    var request: URLRequest {
-        var tempRequest = URLRequest(url: CheckOutPostURL.url)
-        tempRequest.httpMethod = "POST"
-        tempRequest.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-        tempRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+    var request: URLRequest
+    
+    init(){
+        request = URLRequest(url: CheckOutPostURL.url)
+        request.httpMethod = "POST"
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         
-        let payload = try! JSONSerialization.data(withJSONObject: ["id":1,
-                                                                   "checkOutBy": "Amy"// update checkoutby name
-            ]
-            , options: [])
-        tempRequest.httpBody = payload
-        return tempRequest
     }
-    
-    
-    internal func pushGlobalPost(){
+    //need to return objects / or error like he did in examples
+    internal mutating func pushGlobalPost(json: Data){
+        request.httpBody = json
         let task = session.dataTask(with: request) { (optionalData, optionalResponse, optionalError) in
             guard let data = optionalData,
                 let objects = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any]
