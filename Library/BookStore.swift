@@ -11,6 +11,7 @@ import Foundation
 enum BookResult {
     case success([Book])
     case failure(BookStore.Error)
+    
 }
 
 internal final class BookStore {
