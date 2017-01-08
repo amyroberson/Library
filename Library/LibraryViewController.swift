@@ -11,7 +11,7 @@ import UIKit
 class LibraryViewController: UIViewController, UITextFieldDelegate {
     let bookStore = BookStore()
     var checkOutPostObject = CheckOutPost()
-    var returnPostObject = ReturnPostCreator()
+    var returnPostObject = ReturnPost()
     var index: Int = 0
     var currentBook: Book?
     var library: LibrarySystem?
@@ -27,24 +27,26 @@ class LibraryViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet var checkOutTextField: UITextField!
     @IBOutlet var returnTextField: UITextField!
     
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         checkOutTextField.delegate = self
         returnTextField.delegate = self
-        /*bookStore.fetchGlobalBooks { result in
+        bookStore.fetchGlobalBooks { result in
             switch result {
             case .success(let bookResults):
                 self.library = LibrarySystem(books: bookResults)
+                if let books = self.library {
+                    self.currentBook = books.books[self.index]
+                    self.refresh()
+                }
             case .failure(let error):
-                print(error)
-            } // now books should be collected and stored in libraryBooks
-        }*/
-        
-        if let books = library {
-            currentBook = books.books[index]
+                print("\(result) \(error)")
+            }
         }
         
-        //checkOut.pushGlobalPost()
+        
     }
     
     // keeps user from entering text at the wrong time
@@ -82,13 +84,21 @@ class LibraryViewController: UIViewController, UITextFieldDelegate {
             currentBook!.checkedOutBy = textField.text
             if let name = textField.text {
                 let checkOutData: [String:Any] = [
-                    "id" : currentBook!.id,
+                    "title" : currentBook!.title,
                     "checkedOutBy" : name
                     ]
                 let checkOutJson = try! JSONSerialization.data(withJSONObject: checkOutData
                     , options: [])
-                //later this will return so that will need to be updated
-                checkOutPostObject.pushGlobalPost(json: checkOutJson)
+                
+                checkOutPostObject.pushGlobalPost(json: checkOutJson){ result in
+                    switch result{
+                    case let .success(book):
+                        self.library?.books[self.index] = book
+                    default:
+                        print("\(result)")
+                    }
+                }
+                 refresh()
                 
             }
         case returnTextField:
@@ -96,15 +106,24 @@ class LibraryViewController: UIViewController, UITextFieldDelegate {
             currentBook?.checkedOut = false
             if let name = currentBook!.checkedOutBy {
                 let returnData: [String:Any] = [
-                    "id" : currentBook!.id,
+                    "title" : currentBook!.title,
                     "checkedOutBy": name
                     //"returnedBy" : returnTextField.text used later for validation
                 ]
                 let returnJson = try! JSONSerialization.data(withJSONObject: returnData
                     , options: [])
                 
-                //later this will return so that will need to be updated
-                returnPostObject.pushGlobalPost(json: returnJson)
+                
+                returnPostObject.pushGlobalPost(json: returnJson){ result in
+                    switch result{
+                    case let .success(book):
+                         self.library?.books[self.index] = book
+                    default:
+                        print(result)
+                        
+                    }
+                }
+                refresh()
             }
             
         default:
@@ -121,14 +140,41 @@ class LibraryViewController: UIViewController, UITextFieldDelegate {
     }
     
     @IBAction func previousBookButton(_ sender: UIButton) {
-        //update current user
+        if let count = library?.books.count {
+            if index - 1 >= 0 {
+                index -= 1
+            } else {
+                index = count - 1
+            }
+        }
+        currentBook = library?.books[index]
+         refresh()
     }
     
     @IBAction func nextBookButton(_ sender: UIButton) {
         //update current user
+        if let count = library?.books.count {
+            if index + 1 < count {
+                index += 1
+            } else {
+                index = 0
+            }
+        }
+        currentBook = library?.books[index]
+        refresh()
     }
     
     func refresh(){
+        guard Thread.current.isMainThread else {
+            
+            self.perform(#selector(refresh), on: Thread.main, with: nil, waitUntilDone: false)
+            return
+        }
+        titleLabel.text = currentBook?.title
+        authorLabel.text = currentBook?.author
+        genreLabel.text = currentBook?.genre
+        idLabel.text = "ID: \((currentBook?.id)!)"
+        checkedOutNameLabel.text = currentBook?.checkedOutBy
         
     }
     

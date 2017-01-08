@@ -42,14 +42,16 @@ public struct Book {
     }
     
     func toDictionary() -> [String: Any]{
-        let dictionary: [String: Any?] = [
+        var dictionary: [String: Any] = [
             "checkedOut" : self.checkedOut,
             "title" : self.title,
             "author" : self.author,
             "genre" : self.genre,
             "id" : self.id,
-            "checkedOutBy" : self.checkedOutBy
         ]
+        if let name = self.checkedOutBy {
+            dictionary["checkedOutBy"] = name
+        }
         return dictionary
         
     }

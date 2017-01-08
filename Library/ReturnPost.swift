@@ -8,12 +8,22 @@
 
 import Foundation
 
+enum ReturnPostResult {
+    case success(Book)
+    case failure(ReturnPost.Error)
+}
+
 struct ReturnPostURL {
-    static let url = URL(string: "https://reece-tiy-library.herokuapp.com/testPush.json")!
+    static let url = URL(string: "https://reece-tiy-library.herokuapp.com/checkin_book.json")!
 }
 
 
-struct ReturnPostCreator {
+class ReturnPost{
+    enum Error: Swift.Error{
+        case http(HTTPURLResponse)
+        case system(Swift.Error)
+        case API(APIURL.Error)
+    }
     
     let session: URLSession = URLSession.shared
     
@@ -27,19 +37,31 @@ struct ReturnPostCreator {
     }
     
     //need to return objects / or error like he did in examples
-     internal mutating func pushGlobalPost(json: Data){
+    internal func pushGlobalPost(json: Data, completion: @escaping (ReturnPostResult) -> ()) {
         request.httpBody = json
-        let task = session.dataTask(with: request) { (optionalData, optionalResponse, optionalError) in
-            guard let data = optionalData,
-                let objects = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any]
-                else {
-                    print("optionalResponse: \(optionalResponse)")
-                    print("optionalError: \(optionalError)")
-                    return
+        let task = session.dataTask(with: request) {(optionalData, optionalResponse, optionalError) in
+            if let data = optionalData {
+                completion(self.processPostReturn(data: data))
+            } else if let response = optionalResponse {
+                let error = Error.http(response as! HTTPURLResponse)
+                completion(.failure(error))
+            } else {
+                completion(.failure(.system(optionalError!)))
             }
-            print(objects)
         }
-        
         task.resume()
+    }
+    
+    internal func processPostReturn(data: Data) -> ReturnPostResult {
+        if let dictionary = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any]
+        {
+            if let book = Book(dictionary: dictionary){
+                return .success(book)
+            } else {
+                return .failure(.API(.invalidJSONData))
+            }
+        } else {
+            return .failure(.API(.invalidJSONData))
+        }
     }
 }

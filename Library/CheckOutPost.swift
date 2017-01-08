@@ -7,13 +7,23 @@
 //
 
 import Foundation
+
+enum CheckOutPostResult {
+    case success(Book)
+    case failure(CheckOutPost.Error)
+}
+
 struct CheckOutPostURL {
-    static let url = URL(string: "https://reece-tiy-library.herokuapp.com/testPush.json")!
+    static let url = URL(string: "https://reece-tiy-library.herokuapp.com/checkout_book.json")!
 }
 
 
-struct CheckOutPost {
-    
+class CheckOutPost {
+    enum Error: Swift.Error{
+        case http(HTTPURLResponse)
+        case system(Swift.Error)
+        case API(APIURL.Error)
+    }
     let session: URLSession = URLSession.shared
     
     var request: URLRequest
@@ -26,19 +36,32 @@ struct CheckOutPost {
         
     }
     //need to return objects / or error like he did in examples
-    internal mutating func pushGlobalPost(json: Data){
+    internal func pushGlobalPost(json: Data, completion: @escaping (CheckOutPostResult) -> ()) {
         request.httpBody = json
-        let task = session.dataTask(with: request) { (optionalData, optionalResponse, optionalError) in
-            guard let data = optionalData,
-                let objects = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any]
-                else {
-                print("optionalResponse: \(optionalResponse)") //needs to be handled, not necessarily thrown
-                print("optionalError: \(optionalError)") // needs to be handled
-                return
-            }
-            print(objects)
+        let task = session.dataTask(with: request) {(optionalData, optionalResponse, optionalError) in
+                if let data = optionalData {
+                    completion(self.processPostReturn(data: data))
+                } else if let response = optionalResponse {
+                    let error = Error.http(response as! HTTPURLResponse)
+                    completion(.failure(error))
+                } else {
+                    completion(.failure(.system(optionalError!)))
+                }
         }
-    
         task.resume()
+    }
+    
+    internal func processPostReturn(data: Data) -> CheckOutPostResult {
+        
+        
+        if let dictionary = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] {
+            if let book = Book(dictionary: dictionary){
+                return .success(book)
+            } else {
+                return .failure(.API(.invalidJSONData))
+            }
+        } else {
+           return .failure(.API(.invalidJSONData))
+        }
     }
 }
